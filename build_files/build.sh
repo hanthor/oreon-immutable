@@ -8,7 +8,7 @@ set -ouex pipefail
 dnf install -y 'dnf-command(config-manager)'
 
 # Add exclude packages to existing repositories
-EXCLUDE_PACKAGES="kpatch,kpatch-dnf,almalinux-release,anaconda,anaconda-gui,anaconda-core,anaconda-tui,anaconda-widgets,almalinux-indexhtml,almalinux-bookmarks,firefox,anaconda-live"
+EXCLUDE_PACKAGES="kpatch,kpatch-dnf,almalinux-release,system-release,anaconda,anaconda-gui,anaconda-core,anaconda-tui,anaconda-widgets,almalinux-indexhtml,almalinux-bookmarks,firefox,anaconda-live"
 
 # Function to add excludes to repo files
 add_excludes_to_repo() {
@@ -25,6 +25,17 @@ add_excludes_to_repo() {
 }
 
 # Add excludes to existing AlmaLinux repositories
+# Handle different possible repo file names
+for repo_file in /etc/yum.repos.d/almalinux*.repo; do
+    if [ -f "$repo_file" ]; then
+        # Add excludes to common sections
+        for section in appstream baseos crb extras devel; do
+            add_excludes_to_repo "$repo_file" "$section"
+        done
+    fi
+done
+
+# Also check for standard repo names
 add_excludes_to_repo "/etc/yum.repos.d/almalinux-appstream.repo" "appstream"
 add_excludes_to_repo "/etc/yum.repos.d/almalinux-baseos.repo" "baseos"
 add_excludes_to_repo "/etc/yum.repos.d/almalinux-crb.repo" "crb"
@@ -47,13 +58,6 @@ gpgkey=https://download.copr.fedorainfracloud.org/results/brandonlester/oreon-10
 repo_gpgcheck=0
 enabled=1
 
-[epel]
-name=epel
-baseurl=https://dl.fedoraproject.org/pub/epel/10/Everything/\$basearch/
-gpgcheck=1
-gpgkey=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-10
-enabled=1
-
 [backports]
 name=backports
 baseurl=https://download.copr.fedorainfracloud.org/results/brandonlester/oreon-10-backports/centos-stream-9-\$basearch/
@@ -62,6 +66,9 @@ gpgkey=https://download.copr.fedorainfracloud.org/results/brandonlester/oreon-10
 repo_gpgcheck=0
 enabled=1
 EOF
+
+# Install EPEL release (this will create the proper EPEL repo file)
+dnf install -y epel-release
 
 # Install packages (remove unwanted, install wanted)
 dnf remove -y setroubleshoot
@@ -87,7 +94,7 @@ dnf install -y oreon-logos \
   oreon-shell-theme \
   kernel-devel dracut-live python3-crypt-r memtest86+ \
   anaconda anaconda-install-env-deps anaconda-live anaconda-webui \
-  livesys-scripts epel-release fuse xdg-utils atheros-firmware
+  livesys-scripts fuse xdg-utils atheros-firmware
 
 echo "Configuration complete."
 
