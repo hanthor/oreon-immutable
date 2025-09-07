@@ -71,30 +71,21 @@ EOF
 dnf install -y epel-release
 
 # Install packages (remove unwanted, install wanted)
-dnf remove -y setroubleshoot
-rpm -e --nodeps almalinux-release setup sudo almalinux-repos
-dnf install --releasever=10 -y oreon-repos oreon-release
-dnf groupinstall -y \
-"workstation-product-environment" \
-"hardware-support" \
-"multimedia" \
-"core" \
-"standard" \
-"gnome-desktop" \
-"workstation-product-environment" \
-"anaconda-tools"
 
-dnf install -y oreon-logos \
-  oreon-backgrounds \
-  gnome-shell-extension-dash-to-panel-oreon \
-  gnome-shell-extension-arc-menu-oreon \
-  gnome-shell-extension-blur-my-shell-oreon \
-  gnome-shell-extension-desktop-icons \
-  gnome-shell-oreon-theming \
-  oreon-shell-theme \
-  kernel-devel dracut-live python3-crypt-r memtest86+ \
-  anaconda anaconda-install-env-deps anaconda-live anaconda-webui \
-  livesys-scripts fuse xdg-utils atheros-firmware
+
+sudo dnf shell -y --setopt protected_packages= << EOI
+swap almalinux-release oreon-release
+swap almalinux-repos oreon-repos
+run
+install @workstation-product-environment @hardware-support @multimedia @core @standard @gnome-desktop
+run
+swap almalinux-logos oreon-logos
+swap almalinux-backgrounds-oreon-backgrounds
+run
+install gnome-shell-extension-dash-to-panel-oreon gnome-shell-extension-arc-menu-oreon gnome-shell-extension-blur-my-shell-oreon gnome-shell-extension-desktop-icons gnome-shell-oreon-theming oreon-shell-theme kernel-devel python3-crypt-r memtest86+ fuse xdg-utils atheros-firmware
+EOI
+
+rpm -qa | sort | grep -v "almalinux|oreon"
 
 echo "Configuration complete."
 
