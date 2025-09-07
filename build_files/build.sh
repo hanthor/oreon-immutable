@@ -2,67 +2,57 @@
 
 set -ouex pipefail
 
+# Modify existing repos to add excludes instead of replacing them
 
-# Add repositories
+# Install dnf config manager
+dnf install -y 'dnf-command(config-manager)'
+
+# Add exclude packages to existing repositories
+EXCLUDE_PACKAGES="kpatch,kpatch-dnf,almalinux-release,anaconda,anaconda-gui,anaconda-core,anaconda-tui,anaconda-widgets,almalinux-indexhtml,almalinux-bookmarks,firefox,anaconda-live"
+
+# Function to add excludes to repo files
+add_excludes_to_repo() {
+    local repo_file="$1"
+    local repo_section="$2"
+    
+    if [ -f "$repo_file" ]; then
+        # Check if exclude line already exists in this section
+        if ! sed -n "/\[$repo_section\]/,/^\[/p" "$repo_file" | grep -q "^exclude="; then
+            # Add exclude line after the section header
+            sed -i "/\[$repo_section\]/a exclude=$EXCLUDE_PACKAGES" "$repo_file"
+        fi
+    fi
+}
+
+# Add excludes to existing AlmaLinux repositories
+add_excludes_to_repo "/etc/yum.repos.d/almalinux-appstream.repo" "appstream"
+add_excludes_to_repo "/etc/yum.repos.d/almalinux-baseos.repo" "baseos"
+add_excludes_to_repo "/etc/yum.repos.d/almalinux-crb.repo" "crb"
+add_excludes_to_repo "/etc/yum.repos.d/almalinux-extras.repo" "extras"
+
+# Enable CRB repository
+dnf config-manager --set-enabled crb
+
+# Clean cache
+dnf clean all
+rm -rf /var/cache/dnf
+
+# Add new Oreon-specific repositories
 cat <<EOF > /etc/yum.repos.d/oreon.repo
-[devel]
-name=devel
-baseurl=https://raw.repo.almalinux.org/almalinux/10/devel/\$basearch/os/
-exclude=kpatch,kpatch-dnf,almalinux-release,anaconda,anaconda-gui,anaconda-core,anaconda-tui,anaconda-widgets,almalinux-indexhtml,almalinux-bookmarks,firefox
-gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
-
 [oreon]
 name=oreon
 baseurl=https://download.copr.fedorainfracloud.org/results/brandonlester/oreon-10/centos-stream-10-\$basearch/
 gpgcheck=1
 gpgkey=https://download.copr.fedorainfracloud.org/results/brandonlester/oreon-10/pubkey.gpg
 repo_gpgcheck=0
-
-# [oreonoldrepo]
-# name=oreonoldrepo
-# baseurl=https://packages.boostyconnect.com/oreon-10/\$basearch/
-# gpgcheck=0
-
-# [oreonextras]
-# name=oreonextras
-# baseurl=https://packages.boostyconnect.com/oreon-10/extras-\$basearch/
-# gpgcheck=0
+enabled=1
 
 [epel]
 name=epel
 baseurl=https://dl.fedoraproject.org/pub/epel/10/Everything/\$basearch/
 gpgcheck=1
 gpgkey=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-10
-
-[base]
-name=base
-baseurl=https://repo.almalinux.org/almalinux/10/BaseOS/\$basearch/os/
-exclude=anaconda-live,kpatch,kpatch-dnf,almalinux-release,anaconda,anaconda-gui,anaconda-core,anaconda-tui,anaconda-widgets,almalinux-indexhtml,almalinux-bookmarks,firefox
-gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
-
-
-[appstream]
-name=appstream
-baseurl=https://repo.almalinux.org/almalinux/10/AppStream/\$basearch/os/
-exclude=anaconda-live,kpatch,kpatch-dnf,almalinux-release,anaconda,anaconda-gui,anaconda-core,anaconda-tui,anaconda-widgets,almalinux-indexhtml,almalinux-bookmarks,firefox
-gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
-
-[extras]
-name=extras
-baseurl=https://repo.almalinux.org/almalinux/10/extras/\$basearch/os/
-exclude=anaconda-live,kpatch,kpatch-dnf,almalinux-release,anaconda,anaconda-gui,anaconda-core,anaconda-tui,anaconda-widgets,almalinux-indexhtml,almalinux-bookmarks,firefox
-gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
-
-[crb]
-name=crb
-baseurl=https://repo.almalinux.org/almalinux/10/CRB/\$basearch/os/
-exclude=anaconda-live,kpatch,kpatch-dnf,almalinux-release,anaconda,anaconda-gui,anaconda-core,anaconda-tui,anaconda-widgets,almalinux-indexhtml,almalinux-bookmarks,firefox
-gpgcheck=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+enabled=1
 
 [backports]
 name=backports
@@ -70,12 +60,25 @@ baseurl=https://download.copr.fedorainfracloud.org/results/brandonlester/oreon-1
 gpgcheck=1
 gpgkey=https://download.copr.fedorainfracloud.org/results/brandonlester/oreon-10-backports/pubkey.gpg
 repo_gpgcheck=0
+enabled=1
 EOF
 
 # Install packages (remove unwanted, install wanted)
 dnf remove -y setroubleshoot
 rpm -e --nodeps almalinux-release setup sudo almalinux-repos
-dnf install --releasever=10 -y oreon-repos oreon-logos oreon-release oreon-backgrounds \
+dnf install --releasever=10 -y oreon-repos oreon-release
+dnf groupinstall -y \
+"workstation-product-environment" \
+"hardware-support" \
+"multimedia" \
+"core" \
+"standard" \
+"gnome-desktop" \
+"workstation-product-environment" \
+"anaconda-tools"
+
+dnf install -y oreon-logos \
+  oreon-backgrounds \
   gnome-shell-extension-dash-to-panel-oreon \
   gnome-shell-extension-arc-menu-oreon \
   gnome-shell-extension-blur-my-shell-oreon \
