@@ -73,7 +73,7 @@ dnf install -y epel-release
 # Install packages (remove unwanted, install wanted)
 
 
-sudo dnf shell -y --setopt protected_packages= << EOI
+dnf shell -y --setopt protected_packages= << EOI
 swap almalinux-release oreon-release
 swap almalinux-repos oreon-repos
 run
