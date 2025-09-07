@@ -77,6 +77,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
+      - name: Ensure image is available locally
+        run: |
+          # Check if image exists locally first
+          if podman image exists "localhost/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"; then
+            echo "Image found locally at localhost/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
+            # Tag it with the registry name for consistency
+            podman tag "localhost/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}" "${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
+          else
+            echo "Image not found locally, pulling from registry"
+            podman pull "${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
+          fi
+
       - name: Build disk images
         id: build
         uses: osbuild/bootc-image-builder-action@main
