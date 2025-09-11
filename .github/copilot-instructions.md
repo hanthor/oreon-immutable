@@ -1,8 +1,8 @@
 # Oreon Immutable OS
 
-Oreon Immutable OS is a custom bootc-based (container-to-disk) operating system derived from AlmaLinux 10. It builds a custom immutable OS image using container technology that can be deployed as bootable disk images (QCOW2, ISO, raw) or run as containers.
+**ALWAYS follow these instructions first.** Only search for additional context or run exploratory bash commands if the information below is incomplete or found to be incorrect.
 
-Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.
+Oreon Immutable OS is a custom bootc-based (container-to-disk) operating system derived from AlmaLinux 10. It builds a custom immutable OS image using container technology that can be deployed as bootable disk images (QCOW2, ISO, raw) or run as containers.
 
 ## Working Effectively
 
@@ -40,6 +40,10 @@ Always reference these instructions first and fallback to search or bash command
 - `just fix` -- auto-fixes Justfile formatting. Takes < 30 seconds. ✓ WORKS
 - `just clean` -- removes build artifacts. Takes < 1 minute. ✓ WORKS
 - `bash -n build_files/build.sh` -- validate build script syntax. ✓ WORKS
+- **Bootc Container Validation**: `podman run --rm ghcr.io/hanthor/oreon-immutable:latest bootc container lint` ✓ WORKS
+  - This validates the container follows bootc best practices
+  - Shows warnings about /boot contents, sysusers, and tmpfiles.d entries
+  - Critical for ensuring the image will work properly as a bootc container
 
 ### CRITICAL Build Limitations
 - **NETWORK RESTRICTION**: All container builds fail due to blocked quay.io CDN access
@@ -51,11 +55,14 @@ Always reference these instructions first and fallback to search or bash command
 ## Validation Scenarios
 When making changes to this repository:
 
-1. **Always run linting first**: `just lint && just format && just check`
-2. **Test container build**: `just build` (may fail due to network restrictions - document this)
-3. **If container build succeeds**: Test one disk image type: `just build-qcow2`
-4. **Manual validation**: If VM building works, run `just run-vm-qcow2` and verify the OS boots correctly
-5. **Check build scripts**: Any changes to `build_files/build.sh` require manual verification of package installations
+1. **Always run linting first**: `just lint && just format && just check` ✓ ALL WORK
+2. **Test basic podman**: `podman pull docker.io/hello-world && podman run hello-world` ✓ WORKS  
+3. **Test pre-built image**: `podman pull ghcr.io/hanthor/oreon-immutable:latest` ✓ WORKS
+4. **Test bootc functionality**: `podman run --rm ghcr.io/hanthor/oreon-immutable:latest bootc container lint` ✓ WORKS
+5. **Attempt container build**: `just build` (expect to fail due to network restrictions but document the failure)
+6. **Alternative build tools**: Test `podman pull ghcr.io/lorbuschris/bootc-image-builder:20250608` ✓ WORKS
+7. **Manual validation**: If disk building works, run `just build-qcow2` (requires successful container build first)
+8. **Check build scripts**: Any changes to `build_files/build.sh` require syntax validation: `bash -n build_files/build.sh` ✓ WORKS
 
 ## Common Tasks and Timing
 
@@ -77,14 +84,19 @@ When making changes to this repository:
 ```
 
 ### Key Build Commands with Timing
-- `just --list` -- shows all available commands (< 5 seconds)
-- `just build` -- container build: 15-30 minutes when working, often fails due to network restrictions
-- `just build-qcow2` -- QCOW2 VM build: 45-90 minutes. NEVER CANCEL.
-- `just build-iso` -- ISO build: 45-90 minutes. NEVER CANCEL.
-- `just run-vm-qcow2` -- VM startup: 2-5 minutes for VM to boot
-- `just lint` -- linting: < 1 minute
-- `just format` -- formatting: < 1 minute
-- `just clean` -- cleanup: < 1 minute
+- `just --list` -- shows all available commands (< 5 seconds) ✓ WORKS
+- `just build` -- container build: 15-30 minutes when working, **FAILS due to quay.io CDN restrictions**
+- `just lint` -- shellcheck validation: < 1 minute ✓ WORKS
+- `just format` -- shfmt formatting: < 1 minute ✓ WORKS  
+- `just check` -- Justfile syntax: < 30 seconds ✓ WORKS
+- `just fix` -- Justfile formatting: < 30 seconds ✓ WORKS
+- `just clean` -- cleanup: < 1 minute ✓ WORKS
+- `bash -n build_files/build.sh` -- build script syntax: < 5 seconds ✓ WORKS
+- `podman pull ghcr.io/hanthor/oreon-immutable:latest` -- pull pre-built: 2-5 minutes ✓ WORKS
+- `podman run --rm ghcr.io/hanthor/oreon-immutable:latest bootc container lint` -- validate image: < 30 seconds ✓ WORKS
+- `just build-qcow2` -- QCOW2 VM build: 45-90 minutes (requires successful container build first)
+- `just build-iso` -- ISO build: 45-90 minutes (requires successful container build first)
+- `just run-vm-qcow2` -- VM startup: 2-5 minutes for VM to boot (requires built images)
 
 ### Important Files to Monitor
 - Always check `build_files/build.sh` when making package or configuration changes
@@ -106,8 +118,9 @@ When making changes to this repository:
 - **Affected Images**: 
   - `quay.io/almalinuxorg/almalinux-bootc:10` (base image)
   - `quay.io/centos-bootc/bootc-image-builder:latest` (build tool)
-- **Working Registries**: docker.io (Docker Hub) works fine
-- **Test Command**: `podman pull docker.io/hello-world && podman run hello-world` ✓ WORKS
+- **Working Registries**: docker.io (Docker Hub) and ghcr.io (GitHub Container Registry) work perfectly
+- **Pre-built Alternative**: Repository already has pre-built image at `ghcr.io/hanthor/oreon-immutable:latest` ✓ WORKS
+- **Build Tool Alternative**: `.github/workflows/build-disk.yml` uses `ghcr.io/lorbuschris/bootc-image-builder:20250608` ✓ WORKS
 
 ### Container Runtime Issues
 - **systemd warnings**: "cgroupv2 manager is set to systemd but there is no systemd user session available"
@@ -116,11 +129,12 @@ When making changes to this repository:
 - **Impact**: Even with network access, container builds may fail due to runtime restrictions
 
 ### Testing Strategy
-1. **Basic validation**: Always start with `podman pull docker.io/hello-world && podman run hello-world`
-2. **Build attempt**: Try `just build` and document specific failure mode
-3. **Fallback validation**: Use `just lint`, `just format`, `just check` to validate repository health
-4. **Alternative testing**: If you have pre-built images, test with those
-5. **Documentation**: Always document network/runtime limitations encountered
+1. **Basic validation**: Always start with `podman pull docker.io/hello-world && podman run hello-world` ✓ WORKS
+2. **Pre-built image testing**: `podman pull ghcr.io/hanthor/oreon-immutable:latest` ✓ WORKS (pulls successfully)
+3. **Bootc validation**: `podman run --rm ghcr.io/hanthor/oreon-immutable:latest bootc container lint` ✓ WORKS
+4. **Build attempt**: Try `just build` and document specific failure mode (expect quay.io CDN failure)
+5. **Repository validation**: Use `just lint`, `just format`, `just check` ✓ ALL WORK
+6. **Alternative build tools**: `podman pull ghcr.io/lorbuschris/bootc-image-builder:20250608` ✓ WORKS
 
 ## Project Structure and Navigation
 This is a **bootc-based OS image template** that:
