@@ -114,6 +114,25 @@ jobs:
         run: |
           sudo systemctl start podman.socket
 
+      # Debug: Check what images are available
+      - name: Debug - List available images
+        run: |
+          echo "=== Podman images (rootless) ==="
+          podman images
+          echo ""
+          echo "=== Podman images (rootful) ==="
+          sudo podman images
+          echo ""
+          echo "=== Check specific image ==="
+          podman inspect ${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }} || echo "Image not found in rootless storage"
+          sudo podman inspect ${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }} || echo "Image not found in rootful storage"
+          echo ""
+          echo "=== Podman info ==="
+          podman info --format json | jq '.store'
+          echo ""
+          echo "=== Rootful podman info ==="
+          sudo podman info --format json | jq '.store'
+
       # Rechunk is a script that we use on Universal Blue to make sure there isnt a single huge layer when your image gets published.
       # This does not make your image faster to download, just provides better resumability and fixes a few errors.
       # Documentation for Rechunk is provided on their github repository at https://github.com/hhd-dev/rechunk
