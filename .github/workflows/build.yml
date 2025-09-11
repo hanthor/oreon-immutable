@@ -110,6 +110,11 @@ jobs:
           labels: ${{ steps.metadata.outputs.labels }}
           oci: false
 
+      # Push the built image to local podman storage so rechunker can find it
+      - name: Push to local podman storage
+        run: |
+          buildah push ${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }} containers-storage:localhost/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
+
       # Rechunk is a script that we use on Universal Blue to make sure there isnt a single huge layer when your image gets published.
       # This does not make your image faster to download, just provides better resumability and fixes a few errors.
       # Documentation for Rechunk is provided on their github repository at https://github.com/hhd-dev/rechunk
