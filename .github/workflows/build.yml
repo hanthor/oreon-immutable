@@ -110,10 +110,11 @@ jobs:
           labels: ${{ steps.metadata.outputs.labels }}
           oci: false
 
-      # Push the built image to local podman storage so rechunker can find it
-      - name: Push to local podman storage
+      # Load the built image into podman storage for rechunker access
+      - name: Load image into podman storage
         run: |
-          buildah push ${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }} containers-storage:localhost/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
+          # Load the buildah-built image into podman
+          podman pull ${{ steps.build_image.outputs.image }}:${{ env.DEFAULT_TAG }}
 
       # Rechunk is a script that we use on Universal Blue to make sure there isnt a single huge layer when your image gets published.
       # This does not make your image faster to download, just provides better resumability and fixes a few errors.
@@ -123,7 +124,7 @@ jobs:
         uses: hhd-dev/rechunk@f153348d8100c1f504dec435460a0d7baf11a9d2 # v1.1.1
         with:
           rechunk: 'ghcr.io/hhd-dev/rechunk:v1.0.1'
-          ref: "localhost/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
+          ref: "${{ steps.build_image.outputs.image }}:${{ env.DEFAULT_TAG }}"
           prev-ref: "${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
           skip_compression: true
           version: ${{ env.CENTOS_VERSION }}
