@@ -12,27 +12,27 @@ EXCLUDE_PACKAGES="kpatch,kpatch-dnf,almalinux-release,system-release,anaconda,an
 
 # Function to add excludes to repo files
 add_excludes_to_repo() {
-    local repo_file="$1"
-    local repo_section="$2"
-    
-    if [ -f "$repo_file" ]; then
-        # Check if exclude line already exists in this section
-        if ! sed -n "/\[$repo_section\]/,/^\[/p" "$repo_file" | grep -q "^exclude="; then
-            # Add exclude line after the section header
-            sed -i "/\[$repo_section\]/a exclude=$EXCLUDE_PACKAGES" "$repo_file"
-        fi
-    fi
+	local repo_file="$1"
+	local repo_section="$2"
+
+	if [ -f "$repo_file" ]; then
+		# Check if exclude line already exists in this section
+		if ! sed -n "/\[$repo_section\]/,/^\[/p" "$repo_file" | grep -q "^exclude="; then
+			# Add exclude line after the section header
+			sed -i "/\[$repo_section\]/a exclude=$EXCLUDE_PACKAGES" "$repo_file"
+		fi
+	fi
 }
 
 # Add excludes to existing AlmaLinux repositories
 # Handle different possible repo file names
 for repo_file in /etc/yum.repos.d/almalinux*.repo; do
-    if [ -f "$repo_file" ]; then
-        # Add excludes to common sections
-        for section in appstream baseos crb extras devel; do
-            add_excludes_to_repo "$repo_file" "$section"
-        done
-    fi
+	if [ -f "$repo_file" ]; then
+		# Add excludes to common sections
+		for section in appstream baseos crb extras devel; do
+			add_excludes_to_repo "$repo_file" "$section"
+		done
+	fi
 done
 
 # Also check for standard repo names
@@ -49,7 +49,7 @@ dnf clean all
 rm -rf /var/cache/dnf
 
 # Add new Oreon-specific repositories
-cat <<EOF > /etc/yum.repos.d/oreon.repo
+cat <<EOF >/etc/yum.repos.d/oreon.repo
 [oreon]
 name=oreon
 baseurl=https://download.copr.fedorainfracloud.org/results/brandonlester/oreon-10/centos-stream-10-\$basearch/
@@ -72,8 +72,7 @@ dnf install -y epel-release
 
 # Install packages (remove unwanted, install wanted)
 
-
-dnf shell -y --setopt protected_packages= << EOI
+dnf shell -y --setopt protected_packages= <<EOI
 swap almalinux-release oreon-release
 swap almalinux-repos oreon-repos
 run
