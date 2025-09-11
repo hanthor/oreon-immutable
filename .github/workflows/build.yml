@@ -23,7 +23,7 @@ env:
   CENTOS_VERSION: "10"  # do not edit, this is used for the Rechunker step
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-${{ inputs.brand_name}}-${{ inputs.stream_name }}
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
@@ -104,35 +104,34 @@ jobs:
         with:
           containerfiles: |
             ./Containerfile
-          # Postfix image name with -custom to make it a little more descriptive
-          # Syntax: https://docs.github.com/en/actions/learn-github-actions/expressions#format
+          # Build with a simple tag first for rechunking
           image: ${{ env.IMAGE_NAME }}
-          tags: ${{ steps.metadata.outputs.tags }}
+          tags: ${{ env.DEFAULT_TAG }}
           labels: ${{ steps.metadata.outputs.labels }}
           oci: false
 
       # Rechunk is a script that we use on Universal Blue to make sure there isnt a single huge layer when your image gets published.
       # This does not make your image faster to download, just provides better resumability and fixes a few errors.
       # Documentation for Rechunk is provided on their github repository at https://github.com/hhd-dev/rechunk
-      # You can enable it by uncommenting the following lines:
       - name: Run Rechunker
         id: rechunk
         uses: hhd-dev/rechunk@f153348d8100c1f504dec435460a0d7baf11a9d2 # v1.1.1
         with:
           rechunk: 'ghcr.io/hhd-dev/rechunk:v1.0.1'
-          ref: "${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
+          ref: "localhost/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
           prev-ref: "${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
           skip_compression: true
           version: ${{ env.CENTOS_VERSION }}
           labels: ${{ steps.metadata.outputs.labels }} # Rechunk strips out all the labels during build, this needs to be reapplied here with newline separator
 
-      # This is necessary so that the podman socket can find the rechunked image on its storage
-      - name: Load in podman and tag
+      - name: Load rechunked image and apply tags
         run: |
+          # Pull the rechunked image from the rechunker output
           IMAGE=$(podman pull ${{ steps.rechunk.outputs.ref }})
-          sudo rm -rf ${{ steps.rechunk.outputs.output }}
+          
+          # Tag the rechunked image with all the required tags
           for tag in ${{ steps.metadata.outputs.tags }}; do
-            podman tag $IMAGE ${{ env.IMAGE_NAME }}:$tag
+            podman tag $IMAGE ${{ env.IMAGE_NAME }}:${tag}
           done
 
       # These `if` statements are so that pull requests for your custom images do not make it publish any packages under your name without you knowing
