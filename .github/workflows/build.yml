@@ -102,7 +102,7 @@ jobs:
         id: build_image
         run: |
           # Build the image with podman directly
-          podman build \
+          sudo podman build \
             --file ./Containerfile \
             --tag ${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }} \
             --label "${{ steps.metadata.outputs.labels }}" \
