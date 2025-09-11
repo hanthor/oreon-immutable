@@ -33,33 +33,6 @@ For questions and support:
 - [Universal Blue Discord](https://discord.gg/WEu6BdFEtp) - Community chat and support
 - [bootc discussion forums](https://github.com/bootc-dev/bootc/discussions) - Official bootc project discussions
 
-# Getting Started
-
-## Installation
-
-Oreon Immutable OS can be installed in several ways:
-
-### Option 1: Switch from Existing bootc System
-
-If you're already running a bootc-compatible system (Fedora Atomic, Universal Blue images, etc.):
-
-```bash
-sudo bootc switch ghcr.io/hanthor/oreon-immutable:latest
-sudo systemctl reboot
-```
-
-### Option 2: Install from ISO
-
-Download the latest ISO from our releases and boot from it to install Oreon Immutable OS on new hardware.
-
-### Option 3: Deploy to Virtual Machine
-
-Use the QCOW2 images for virtual machine deployments:
-
-```bash
-# Download and run with QEMU
-qemu-system-x86_64 -m 4G -smp 2 -drive file=oreon-immutable.qcow2
-```
 
 ## System Management
 
@@ -77,19 +50,6 @@ sudo bootc switch ghcr.io/hanthor/oreon-immutable:latest
 
 # Rollback to previous version
 sudo bootc rollback
-```
-
-## Package Management
-
-The base system is immutable, but you can layer additional packages:
-
-```bash
-# Layer additional packages (requires reboot)
-rpm-ostree install <package-name>
-
-# Use toolbox/distrobox for containerized development
-toolbox create
-toolbox enter
 ```
 
 # Building and Development
