@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Script to build Oreon images using the Titanoboa builder
 # Usage: build-titanoboa.sh <variant> <flavor> <repo> [hook_script]
-#   variant: oreon-core
+#   variant: oreon-bootc
 #   flavor: core
 #   repo: local, ghcr
 #   hook_script: optional post_rootfs hook script (default: ../iso_files/configure_lts_iso_anaconda.sh)
@@ -19,7 +19,7 @@ flatpaks_file="${5:-iso_files/system-flatpaks.list}"
 BUILD_DIR=.build/${variant}-${flavor}
 # Map variants to distros for TITANOBOA_BUILDER_DISTRO
 case "$variant" in
-"oreon-core" | "almalinux-kitten")
+"oreon-bootc" | "almalinux-kitten")
 	IMAGE_DISTRO="almalinux"
 	;;
 

@@ -1,4 +1,4 @@
-export image_name := env("IMAGE_NAME", "oreon-core")
+export image_name := env("IMAGE_NAME", "oreon-bootc")
 export default_tag := env("DEFAULT_TAG", "latest")
 export bib_image := env("BIB_IMAGE", "quay.io/centos-bootc/bootc-image-builder:latest")
 
@@ -97,7 +97,7 @@ build $target_image=image_name $tag=default_tag:
         .
 
 
-iso variant='oreon-core' flavor='core' repo='local' hook_script='iso_files/configure_oreon_liveiso.sh' flatpaks_file='iso_files/system-flatpaks.list':
+iso variant='oreon-bootc' flavor='core' repo='local' hook_script='iso_files/configure_oreon_liveiso.sh' flatpaks_file='iso_files/system-flatpaks.list':
     #!/usr/bin/env bash
     bash ./scripts/build-liveiso.sh {{ variant }} {{ flavor }} {{ repo }} {{ hook_script }}
 

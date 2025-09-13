@@ -19,12 +19,12 @@ on:
         default: false
         type: boolean
       image_variant:
-        description: 'Image variant to build (oreon-core, all)'
+        description: 'Image variant to build (oreon-bootc, all)'
         required: false
         default: 'all'
         type: choice
         options:
-          - oreon-core
+          - oreon-bootc
           - all
       flavor:
         description: 'Flavor (core)'
@@ -69,24 +69,24 @@ jobs:
         id: set-matrix
         run: |
           # Determine which image variants to build
-          IMAGE_VARIANTS="oreon-core"
+          IMAGE_VARIANTS="oreon-bootc"
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             if [[ "${{ inputs.image_variant }}" != "all" ]]; then
               IMAGE_VARIANTS="${{ inputs.image_variant }}"
             else
               # Include all variants when explicitly requested
-              IMAGE_VARIANTS="oreon-core"
+              IMAGE_VARIANTS="oreon-bootc"
             fi
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # For PRs, default to oreon-core
-            IMAGE_VARIANTS="oreon-core"
+            # For PRs, default to oreon-bootc
+            IMAGE_VARIANTS="oreon-bootc"
           fi
           # Generate matrix
           MATRIX="{\"include\":[]}"
           for image_variant in $IMAGE_VARIANTS; do
             # Set image-specific values
             case "$image_variant" in
-              oreon-core)
+              oreon-bootc)
                 DESCRIPTION="cored on AlmaLinux 10"
                 PLATFORMS="linux/arm64,linux/amd64"
                 ;;

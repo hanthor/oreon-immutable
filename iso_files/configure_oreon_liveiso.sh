@@ -67,7 +67,7 @@ sed -i 's|/usr/libexec/webui-desktop|/usr/libexec/anaconda/webui-desktop|g' /bin
 # Anaconda Profile Detection
 
 # Oreon Core
-tee /etc/anaconda/profile.d/oreon-core.conf <<'EOF'
+tee /etc/anaconda/profile.d/oreon-bootc.conf <<'EOF'
 # Anaconda configuration file for  Oreon Core
 
 [Profile]
@@ -76,7 +76,7 @@ profile_id = oreon
 
 [Profile Detection]
 # Match os-release values
-os_id = oreon-core
+os_id = oreon-bootc
 
 [Network]
 default_on_boot = FIRST_WIRED_WITH_LINK
@@ -104,8 +104,8 @@ hidden_webui_pages =
 use_geolocation = False
 EOF
 
-sed -i 's/^ID=.*/ID=-oreon-core/' /usr/lib/os-release
-echo "VARIANT_ID=oreon-core" >>/usr/lib/os-release
+sed -i 's/^ID=.*/ID=-oreon-bootc/' /usr/lib/os-release
+echo "VARIANT_ID=oreon-bootc" >>/usr/lib/os-release
 
 # Configure
 . /etc/os-release
