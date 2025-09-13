@@ -275,24 +275,9 @@ run-vm-raw $target_image=("localhost/" + image_name) $tag=default_tag: && (_run-
 [group('Run Virtal Machine')]
 run-vm-iso $target_image=("localhost/" + image_name) $tag=default_tag: && (_run-vm target_image tag "iso" "disk_config/iso.toml")
 
-# Run a virtual machine using systemd-vmspawn
-[group('Run Virtal Machine')]
-spawn-vm rebuild="0" type="qcow2" ram="6G":
+iso variant='oreon-core' flavor='core' repo='local' hook_script='iso_files/configure_oreon_liveiso.sh' flatpaks_file='iso_files/system-flatpaks.list':
     #!/usr/bin/env bash
-
-    set -euo pipefail
-
-    [ "{{ rebuild }}" -eq 1 ] && echo "Rebuilding the ISO" && just build-vm {{ rebuild }} {{ type }}
-
-    systemd-vmspawn \
-      -M "bootc-image" \
-      --console=gui \
-      --cpus=2 \
-      --ram=$(echo {{ ram }}| /usr/bin/numfmt --from=iec) \
-      --network-user-mode \
-      --vsock=false --pass-ssh-key=false \
-      -i ./output/**/*.{{ type }}
-
+    bash ./scripts/build-liveiso.sh {{ variant }} {{ flavor }} {{ repo }} {{ hook_script }}
 
 # Runs shell check on all Bash scripts
 lint:
