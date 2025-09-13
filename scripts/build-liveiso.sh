@@ -30,7 +30,7 @@ case "$variant" in
 esac
 
 # Construct the image URI
-if [ "$flavor" != "base" ]; then
+if [ "$flavor" != "core" ]; then
 	FLAVOR_SUFFIX="-$flavor"
 else
 	FLAVOR_SUFFIX=""

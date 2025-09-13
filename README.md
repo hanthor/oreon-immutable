@@ -46,7 +46,7 @@ sudo bootc status
 sudo bootc upgrade
 
 # Switch to a different version/variant
-sudo bootc switch ghcr.io/hanthor/oreon-immutable:latest
+sudo bootc switch ghcr.io/hanthor/oreon-core:latest
 
 # Rollback to previous version
 sudo bootc rollback
@@ -69,7 +69,7 @@ This section is for developers and advanced users who want to build custom varia
 just build
 
 # Build with custom parameters
-just build ghcr.io/hanthor/oreon-immutable:latest latest
+just build ghcr.io/hanthor/oreon-core:latest latest
 ```
 
 ## Building Disk Images
@@ -158,7 +158,7 @@ To create your own variant:
 ## Container Registry
 
 Pre-built images are available at:
-- `ghcr.io/hanthor/oreon-immutable:latest`
+- `ghcr.io/hanthor/oreon-core:latest`
 
 Images are signed using cosign for security verification.
 

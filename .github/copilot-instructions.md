@@ -40,7 +40,7 @@ Oreon Immutable OS is a custom bootc-based (container-to-disk) operating system 
 - `just fix` -- auto-fixes Justfile formatting. Takes < 30 seconds. ✓ WORKS
 - `just clean` -- removes build artifacts. Takes < 1 minute. ✓ WORKS
 - `bash -n build_files/build.sh` -- validate build script syntax. ✓ WORKS
-- **Bootc Container Validation**: `podman run --rm ghcr.io/hanthor/oreon-immutable:latest bootc container lint` ✓ WORKS
+- **Bootc Container Validation**: `podman run --rm ghcr.io/hanthor/oreon-core:latest bootc container lint` ✓ WORKS
   - This validates the container follows bootc best practices
   - Shows warnings about /boot contents, sysusers, and tmpfiles.d entries
   - Critical for ensuring the image will work properly as a bootc container
@@ -57,8 +57,8 @@ When making changes to this repository:
 
 1. **Always run linting first**: `just lint && just format && just check` ✓ ALL WORK
 2. **Test basic podman**: `podman pull docker.io/hello-world && podman run hello-world` ✓ WORKS  
-3. **Test pre-built image**: `podman pull ghcr.io/hanthor/oreon-immutable:latest` ✓ WORKS
-4. **Test bootc functionality**: `podman run --rm ghcr.io/hanthor/oreon-immutable:latest bootc container lint` ✓ WORKS
+3. **Test pre-built image**: `podman pull ghcr.io/hanthor/oreon-core:latest` ✓ WORKS
+4. **Test bootc functionality**: `podman run --rm ghcr.io/hanthor/oreon-core:latest bootc container lint` ✓ WORKS
 5. **Attempt container build**: `just build` (expect to fail due to network restrictions but document the failure)
 6. **Alternative build tools**: Test `podman pull ghcr.io/lorbuschris/bootc-image-builder:20250608` ✓ WORKS
 7. **Manual validation**: If disk building works, run `just build-qcow2` (requires successful container build first)
@@ -68,7 +68,7 @@ When making changes to this repository:
 
 ### Repository Structure
 ```
-/home/runner/work/oreon-immutable/oreon-immutable/
+/home/runner/work/oreon-core/oreon-core/
 ├── Containerfile              # Container image definition
 ├── Justfile                   # Build automation (uses just command runner)
 ├── build_files/
@@ -92,8 +92,8 @@ When making changes to this repository:
 - `just fix` -- Justfile formatting: < 30 seconds ✓ WORKS
 - `just clean` -- cleanup: < 1 minute ✓ WORKS
 - `bash -n build_files/build.sh` -- build script syntax: < 5 seconds ✓ WORKS
-- `podman pull ghcr.io/hanthor/oreon-immutable:latest` -- pull pre-built: 2-5 minutes ✓ WORKS
-- `podman run --rm ghcr.io/hanthor/oreon-immutable:latest bootc container lint` -- validate image: < 30 seconds ✓ WORKS
+- `podman pull ghcr.io/hanthor/oreon-core:latest` -- pull pre-built: 2-5 minutes ✓ WORKS
+- `podman run --rm ghcr.io/hanthor/oreon-core:latest bootc container lint` -- validate image: < 30 seconds ✓ WORKS
 - `just build-qcow2` -- QCOW2 VM build: 45-90 minutes (requires successful container build first)
 - `just build-iso` -- ISO build: 45-90 minutes (requires successful container build first)
 - `just run-vm-qcow2` -- VM startup: 2-5 minutes for VM to boot (requires built images)
@@ -119,7 +119,7 @@ When making changes to this repository:
   - `quay.io/almalinuxorg/almalinux-bootc:10` (base image)
   - `quay.io/centos-bootc/bootc-image-builder:latest` (build tool)
 - **Working Registries**: docker.io (Docker Hub) and ghcr.io (GitHub Container Registry) work perfectly
-- **Pre-built Alternative**: Repository already has pre-built image at `ghcr.io/hanthor/oreon-immutable:latest` ✓ WORKS
+- **Pre-built Alternative**: Repository already has pre-built image at `ghcr.io/hanthor/oreon-core:latest` ✓ WORKS
 - **Build Tool Alternative**: `.github/workflows/build-disk.yml` uses `ghcr.io/lorbuschris/bootc-image-builder:20250608` ✓ WORKS
 
 ### Container Runtime Issues
@@ -130,8 +130,8 @@ When making changes to this repository:
 
 ### Testing Strategy
 1. **Basic validation**: Always start with `podman pull docker.io/hello-world && podman run hello-world` ✓ WORKS
-2. **Pre-built image testing**: `podman pull ghcr.io/hanthor/oreon-immutable:latest` ✓ WORKS (pulls successfully)
-3. **Bootc validation**: `podman run --rm ghcr.io/hanthor/oreon-immutable:latest bootc container lint` ✓ WORKS
+2. **Pre-built image testing**: `podman pull ghcr.io/hanthor/oreon-core:latest` ✓ WORKS (pulls successfully)
+3. **Bootc validation**: `podman run --rm ghcr.io/hanthor/oreon-core:latest bootc container lint` ✓ WORKS
 4. **Build attempt**: Try `just build` and document specific failure mode (expect quay.io CDN failure)
 5. **Repository validation**: Use `just lint`, `just format`, `just check` ✓ ALL WORK
 6. **Alternative build tools**: `podman pull ghcr.io/lorbuschris/bootc-image-builder:20250608` ✓ WORKS
