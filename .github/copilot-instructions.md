@@ -93,7 +93,7 @@ When making changes to this repository:
 - `just clean` -- cleanup: < 1 minute ✓ WORKS
 - `bash -n build_files/build.sh` -- build script syntax: < 5 seconds ✓ WORKS
 - `podman pull ghcr.io/hanthor/oreon-bootc:latest` -- pull pre-built: 2-5 minutes ✓ WORKS
-- `podman run --rm ghcr.io/hanthor/oreon-bootc:latest bootc container lint` -- validate image: < 30 seconds ✓ WORKS
+- `podman run --security-opt label=disable --rm ghcr.io/hanthor/oreon-bootc:latest bootc container lint` -- validate image: < 30 seconds ✓ WORKS
 - `just build-qcow2` -- QCOW2 VM build: 45-90 minutes (requires successful container build first)
 - `just build-iso` -- ISO build: 45-90 minutes (requires successful container build first)
 - `just run-vm-qcow2` -- VM startup: 2-5 minutes for VM to boot (requires built images)

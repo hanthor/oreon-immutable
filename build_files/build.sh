@@ -76,10 +76,10 @@ dnf shell -y --setopt protected_packages= <<EOI
 swap almalinux-release oreon-release
 swap almalinux-repos oreon-repos
 run
-install @workstation-product-environment @hardware-support @multimedia @core @standard @gnome-desktop
+install @workstation-product-environment @hardware-support @multimedia @core @standard @gnome-desktop glib2
 run
 swap almalinux-logos oreon-logos
-swap almalinux-backgrounds-oreon-backgrounds
+swap almalinux-backgrounds oreon-backgrounds
 run
 install gnome-shell-extension-dash-to-panel-oreon gnome-shell-extension-arc-menu-oreon gnome-shell-extension-blur-my-shell-oreon gnome-shell-extension-desktop-icons gnome-shell-oreon-theming oreon-shell-theme kernel-devel python3-crypt-r memtest86+ fuse xdg-utils atheros-firmware
 EOI

@@ -2,9 +2,8 @@
 
 set -eoux pipefail
 
-IMAGE_INFO="$(cat /usr/share/ublue-os/image-info.json)"
-IMAGE_TAG="$(jq -c -r '."image-tag"' <<<"$IMAGE_INFO")"
-IMAGE_REF="$(jq -c -r '."image-ref"' <<<"$IMAGE_INFO")"
+IMAGE_TAG="latest"
+IMAGE_REF="ostree-image-signed:docker://ghcr.io/oreonproject/oreon-bootc"
 IMAGE_REF="${IMAGE_REF##*://}"
 # sbkey='https://github.com/ublue-os/akmods/raw/main/certs/public_key.der'
 
@@ -119,7 +118,11 @@ sed -i 's| Fedora| Oreon|' /usr/share/anaconda/gnome/fedora-welcome || true
 sed -i 's|Activities|in the dock|' /usr/share/anaconda/gnome/fedora-welcome || true
 
 # Get Artwork
-dnf install -y oreon-logos
+dnf shell -y --setopt protected_packages= <<EOI
+swap almalinux-logos oreon-logos
+swap almalinux-backgrounds oreon-backgrounds
+run
+EOI
 mkdir -p /usr/share/anaconda/pixmaps/silverblue
 cp -r /usr/share/oreon-logos/* /usr/share/anaconda/pixmaps/silverblue/
 rm -rf /root/packages
